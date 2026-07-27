@@ -1,0 +1,14 @@
+.snowflake/
+.vercel/
+
+# Generated build output
+dist/
+dev-dist/
+
+# Environment variables
+.env.*
+!.env.example
+
+# Common ignores
+node_modules
+.DS_Store
