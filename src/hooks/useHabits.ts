@@ -25,7 +25,7 @@ interface UseHabitsResult {
  * Central state + actions for habits. Uses optimistic updates so the UI feels
  * instant, then reconciles with Supabase.
  */
-export function useHabits(): UseHabitsResult {
+export function useHabits(userId: string): UseHabitsResult {
   const [habits, setHabits] = useState<HabitWithCompletions[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export function useHabits(): UseHabitsResult {
   const reload = useCallback(async () => {
     try {
       setError(null);
-      const data = await fetchHabitsWithCompletions();
+      const data = await fetchHabitsWithCompletions(userId);
       setHabits(data);
     } catch (err) {
       console.error("Failed to load habits:", err);
@@ -41,7 +41,7 @@ export function useHabits(): UseHabitsResult {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -54,7 +54,7 @@ export function useHabits(): UseHabitsResult {
   const addHabit = useCallback(async (input: NewHabitInput) => {
     try {
       setError(null);
-      const created = await createHabit(input);
+      const created = await createHabit(input, userId);
       setHabits((prev) => [...prev, { ...created, completedDates: new Set<string>() }]);
       return true;
     } catch (err) {
@@ -62,7 +62,7 @@ export function useHabits(): UseHabitsResult {
       setError("Could not create habit. Please check your Supabase configuration.");
       return false;
     }
-  }, []);
+  }, [userId]);
 
   const removeHabit = useCallback(
     async (habitId: string) => {
@@ -71,7 +71,7 @@ export function useHabits(): UseHabitsResult {
       setError(null);
       setHabits((prev) => prev.filter((h) => h.id !== habitId));
       try {
-        await deleteHabit(habitId);
+        await deleteHabit(habitId, userId);
       } catch (err) {
         console.error("Failed to delete habit:", err);
         if (habitToRestore && originalIndex >= 0) {
@@ -84,7 +84,7 @@ export function useHabits(): UseHabitsResult {
         setError("Could not delete habit. Please check your Supabase configuration.");
       }
     },
-    [habits],
+      [habits, userId],
   );
 
   const toggleToday = useCallback(
@@ -107,8 +107,8 @@ export function useHabits(): UseHabitsResult {
       );
 
       try {
-        if (isDone) await unmarkCompleted(habitId, key);
-        else await markCompleted(habitId, key);
+        if (isDone) await unmarkCompleted(habitId, key, userId);
+        else await markCompleted(habitId, key, userId);
       } catch (err) {
         console.error("Failed to toggle completion:", err);
         // Revert on failure.
@@ -127,7 +127,7 @@ export function useHabits(): UseHabitsResult {
 
       setError(null);
     },
-    [habits],
+    [habits, userId],
   );
 
   return { habits, loading, error, addHabit, removeHabit, toggleToday, reload };

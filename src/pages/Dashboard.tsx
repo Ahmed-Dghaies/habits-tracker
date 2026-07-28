@@ -9,8 +9,14 @@ import { SummaryHeader } from "@/components/SummaryHeader";
 import { useHabits } from "@/hooks/useHabits";
 import { todayKey } from "@/utils/dates";
 
-export function Dashboard() {
-  const { habits, loading, error, addHabit, removeHabit, toggleToday } = useHabits();
+interface DashboardProps {
+  userId: string;
+  userEmail?: string | null;
+  onSignOut: () => Promise<void>;
+}
+
+export function Dashboard({ userId, userEmail, onSignOut }: DashboardProps) {
+  const { habits, loading, error, addHabit, removeHabit, toggleToday } = useHabits(userId);
   const [modalOpen, setModalOpen] = useState(false);
 
   const completedToday = useMemo(() => {
@@ -26,9 +32,24 @@ export function Dashboard() {
 
   return (
     <div className="mx-auto min-h-dvh max-w-2xl px-4 pb-28 pt-[max(1.5rem,env(safe-area-inset-top))]">
-      <header className="mb-5">
-        <p className="text-sm text-muted-foreground">{today}</p>
-        <h1 className="text-2xl font-semibold tracking-tight">Habits</h1>
+      <header className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm text-muted-foreground">{today}</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Habits</h1>
+        </div>
+        <div className="flex flex-col items-end gap-2">
+          <div className="rounded-full border border-border bg-card px-3 py-1 text-right text-xs text-muted-foreground">
+            <p className="font-medium text-card-foreground">Signed in</p>
+            <p className="max-w-[12rem] truncate">{userEmail ?? userId}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void onSignOut()}
+            className="h-9 rounded-md border border-border px-3 text-sm font-medium text-card-foreground transition-colors hover:bg-muted"
+          >
+            Sign out
+          </button>
+        </div>
       </header>
 
       {loading ? (

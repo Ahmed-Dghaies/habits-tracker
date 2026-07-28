@@ -1,5 +1,6 @@
 export interface Habit {
   id: string
+  user_id: string
   name: string
   icon: string
   color: string
@@ -8,6 +9,7 @@ export interface Habit {
 
 export interface HabitCompletion {
   id: string
+  user_id: string
   habit_id: string
   completed_date: string // YYYY-MM-DD
   created_at: string
