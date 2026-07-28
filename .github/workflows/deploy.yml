@@ -13,6 +13,10 @@ jobs:
     name: Deploy site
     runs-on: ubuntu-latest
 
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -28,6 +32,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Validate Supabase env
+        run: |
+          test -n "$VITE_SUPABASE_URL"
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
 
       - name: Build site
         run: pnpm build
