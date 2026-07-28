@@ -1,3 +1,8 @@
+
+function isAuthClockSkewError(err: unknown) {
+  if (!(err instanceof Error)) return false;
+  return err.message.includes("JWT issued at future") || err.message.includes("PGRST303");
+}
 import { useCallback, useEffect, useState } from "react";
 
 import {
@@ -30,14 +35,26 @@ export function useHabits(userId: string): UseHabitsResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const reload = useCallback(async () => {
+
+  const reload = useCallback(async function reloadAttempt(retryCount = 0) {
     try {
       setError(null);
       const data = await fetchHabitsWithCompletions(userId);
       setHabits(data);
     } catch (err) {
       console.error("Failed to load habits:", err);
-      setError("Could not load habits. Please try again.");
+      if (isAuthClockSkewError(err) && retryCount < 1) {
+        window.setTimeout(() => {
+          void reloadAttempt(retryCount + 1);
+        }, 1500);
+        return;
+      }
+
+      setError(
+        isAuthClockSkewError(err)
+          ? "Supabase authentication is not ready yet. Refresh the page or sign out and back in."
+          : "Could not load habits. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
