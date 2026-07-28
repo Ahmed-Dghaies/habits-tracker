@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { HabitWithCompletions, NewHabitInput } from "@/types";
+
 import {
   createHabit,
   deleteHabit,
@@ -8,6 +8,8 @@ import {
   unmarkCompleted,
 } from "@/services/habitsService";
 import { todayKey } from "@/utils/dates";
+
+import type { HabitWithCompletions, NewHabitInput } from "@/types";
 
 interface UseHabitsResult {
   habits: HabitWithCompletions[];
@@ -42,7 +44,11 @@ export function useHabits(): UseHabitsResult {
   }, []);
 
   useEffect(() => {
-    void reload();
+    const timeoutId = window.setTimeout(() => {
+      void reload();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [reload]);
 
   const addHabit = useCallback(async (input: NewHabitInput) => {

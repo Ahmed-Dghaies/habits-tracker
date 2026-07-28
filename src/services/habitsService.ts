@@ -1,4 +1,5 @@
 import { requireSupabase } from "@/lib/supabase"
+
 import type { Habit, HabitCompletion, HabitWithCompletions, NewHabitInput } from "@/types"
 
 /**

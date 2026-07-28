@@ -1,10 +1,12 @@
-import { HABIT_ICON_NAMES, getHabitIcon } from "@/utils/icons"
-import { hexToRgba } from "@/utils/colors"
+import { Activity } from "lucide-react";
+
+import { hexToRgba } from "@/utils/colors";
+import { HABIT_ICONS, HABIT_ICON_NAMES } from "@/utils/icons";
 
 interface IconPickerProps {
-  value: string
-  color: string
-  onChange: (icon: string) => void
+  value: string;
+  color: string;
+  onChange: (icon: string) => void;
 }
 
 export function IconPicker({ value, color, onChange }: IconPickerProps) {
@@ -15,8 +17,8 @@ export function IconPicker({ value, color, onChange }: IconPickerProps) {
       aria-label="Choose an icon"
     >
       {HABIT_ICON_NAMES.map((name) => {
-        const Icon = getHabitIcon(name)
-        const selected = value === name
+        const Icon = HABIT_ICONS[name] ?? Activity;
+        const selected = value === name;
         return (
           <button
             key={name}
@@ -34,8 +36,8 @@ export function IconPicker({ value, color, onChange }: IconPickerProps) {
           >
             <Icon size={18} aria-hidden="true" />
           </button>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

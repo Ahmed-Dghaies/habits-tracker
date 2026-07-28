@@ -1,0 +1,41 @@
+name: On commit checks
+
+on:
+  push:
+    branches: ["**"]
+
+jobs:
+  typecheck:
+    name: "TypeScript checks"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm ci
+
+      - name: TypeScript type checking
+        run: npx tsc -b
+  eslint:
+    name: "ESLint"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm ci
+
+      - name: Run ESLint
+        run: pnpm run lint

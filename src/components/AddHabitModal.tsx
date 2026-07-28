@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
-import type { NewHabitInput } from "@/types";
-import { HABIT_COLORS, randomColor } from "@/utils/colors";
-import { getHabitIcon } from "@/utils/icons";
+
+import { Activity, X } from "lucide-react";
+
 import { IconPicker } from "@/components/IconPicker";
+import { HABIT_COLORS, randomColor } from "@/utils/colors";
+import { HABIT_ICONS } from "@/utils/icons";
+
+import type { NewHabitInput } from "@/types";
 
 interface AddHabitModalProps {
   open: boolean;
@@ -17,17 +20,6 @@ export function AddHabitModal({ open, onClose, onCreate }: AddHabitModalProps) {
   const [color, setColor] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Reset the form whenever the modal opens.
-  useEffect(() => {
-    if (open) {
-      setName("");
-      setIcon("Activity");
-      setColor(null);
-      setSubmitting(false);
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
-  }, [open]);
 
   // Close on Escape.
   useEffect(() => {
@@ -43,7 +35,7 @@ export function AddHabitModal({ open, onClose, onCreate }: AddHabitModalProps) {
 
   // Preview color: chosen color, or the first palette color as a hint.
   const previewColor = color ?? HABIT_COLORS[0];
-  const PreviewIcon = getHabitIcon(icon);
+  const PreviewIcon = HABIT_ICONS[icon] ?? Activity;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

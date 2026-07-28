@@ -1,11 +1,11 @@
 interface SummaryHeaderProps {
-  completedToday: number
-  total: number
+  completedToday: number;
+  total: number;
 }
 
 export function SummaryHeader({ completedToday, total }: SummaryHeaderProps) {
-  const pct = total === 0 ? 0 : Math.round((completedToday / total) * 100)
-  const allDone = total > 0 && completedToday === total
+  const pct = total === 0 ? 0 : Math.round((completedToday / total) * 100);
+  const allDone = total > 0 && completedToday === total;
 
   return (
     <div className="rounded-lg border border-border bg-card p-5">
@@ -28,16 +28,16 @@ export function SummaryHeader({ completedToday, total }: SummaryHeaderProps) {
 
       <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-[var(--color-primary)] transition-[width] duration-500 ease-out"
+          className="h-full rounded-full bg-(--color-primary) transition-[width] duration-500 ease-out"
           style={{ width: `${pct}%` }}
         />
       </div>
 
       {allDone && (
-        <p className="mt-3 text-sm font-medium text-[var(--color-primary)]">
+        <p className="mt-3 text-sm font-medium text-(--color-primary)">
           All habits complete for today. Nice work.
         </p>
       )}
     </div>
-  )
+  );
 }

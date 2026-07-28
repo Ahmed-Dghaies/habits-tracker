@@ -1,10 +1,12 @@
-import { Check, Flame, Trash2 } from "lucide-react";
-import type { HabitWithCompletions } from "@/types";
-import { getHabitIcon } from "@/utils/icons";
+import { Activity, Check, Flame, Trash2 } from "lucide-react";
+
+import { Heatmap } from "@/components/Heatmap";
 import { hexToRgba } from "@/utils/colors";
 import { todayKey } from "@/utils/dates";
+import { HABIT_ICONS } from "@/utils/icons";
 import { currentStreak } from "@/utils/stats";
-import { Heatmap } from "@/components/Heatmap";
+
+import type { HabitWithCompletions } from "@/types";
 
 interface HabitCardProps {
   habit: HabitWithCompletions;
@@ -13,7 +15,7 @@ interface HabitCardProps {
 }
 
 export function HabitCard({ habit, onToggleToday, onDelete }: HabitCardProps) {
-  const Icon = getHabitIcon(habit.icon);
+  const Icon = HABIT_ICONS[habit.icon] ?? Activity;
   const doneToday = habit.completedDates.has(todayKey());
   const streak = currentStreak(habit.completedDates);
   const total = habit.completedDates.size;

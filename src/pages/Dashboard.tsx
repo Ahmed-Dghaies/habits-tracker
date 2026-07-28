@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
+
 import { Plus } from "lucide-react";
-import { useHabits } from "@/hooks/useHabits";
-import { todayKey } from "@/utils/dates";
-import { SummaryHeader } from "@/components/SummaryHeader";
-import { HabitCard } from "@/components/HabitCard";
+
 import { AddHabitModal } from "@/components/AddHabitModal";
 import { EmptyState } from "@/components/EmptyState";
+import { HabitCard } from "@/components/HabitCard";
+import { SummaryHeader } from "@/components/SummaryHeader";
+import { useHabits } from "@/hooks/useHabits";
+import { todayKey } from "@/utils/dates";
 
 export function Dashboard() {
   const { habits, loading, error, addHabit, removeHabit, toggleToday } = useHabits();
@@ -65,7 +67,12 @@ export function Dashboard() {
         <Plus size={26} aria-hidden="true" />
       </button>
 
-      <AddHabitModal open={modalOpen} onClose={() => setModalOpen(false)} onCreate={addHabit} />
+      <AddHabitModal
+        key={modalOpen ? "open" : "closed"}
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onCreate={addHabit}
+      />
     </div>
   );
 }

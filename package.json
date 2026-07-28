@@ -1,19 +1,28 @@
 {
   "name": "habit-tracker",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@eslint/js": "^10.0.1",
     "@fontsource-variable/inter": "^5.3.0",
     "@radix-ui/react-tooltip": "^1.2.16",
     "@supabase/supabase-js": "^2.110.9",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.8.0",
     "lucide-react": "^1.16.0",
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "typescript-eslint": "^8.65.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -21,6 +30,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.4",
+    "eslint-import-resolver-typescript": "^4.4.5",
     "pg": "^8.22.0",
     "tailwindcss": "^4.3.3",
     "typescript": "5.7.3",
