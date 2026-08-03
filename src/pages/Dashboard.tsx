@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { Plus } from "lucide-react";
+import { LogOut, Plus, RefreshCw } from "lucide-react";
 
 import { AddHabitModal } from "@/components/AddHabitModal";
 import { EmptyState } from "@/components/EmptyState";
@@ -15,9 +15,22 @@ interface DashboardProps {
   onSignOut: () => Promise<void>;
 }
 
+function getUserInitials(userEmail: string | null | undefined, userId: string): string {
+  const username = userEmail?.split("@")[0] || userId;
+  const initials = username
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2);
+
+  return (initials || username.slice(0, 2)).toUpperCase();
+}
+
 export function Dashboard({ userId, userEmail, onSignOut }: DashboardProps) {
-  const { habits, loading, error, addHabit, removeHabit, toggleToday } = useHabits(userId);
+  const { habits, loading, error, addHabit, removeHabit, toggleToday, reload } = useHabits(userId);
   const [modalOpen, setModalOpen] = useState(false);
+  const userInitials = getUserInitials(userEmail, userId);
 
   const completedToday = useMemo(() => {
     const key = todayKey();
@@ -37,17 +50,22 @@ export function Dashboard({ userId, userEmail, onSignOut }: DashboardProps) {
           <p className="text-sm text-muted-foreground">{today}</p>
           <h1 className="text-2xl font-semibold tracking-tight">Habits</h1>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className="rounded-full border border-border bg-card px-3 py-1 text-right text-xs text-muted-foreground">
-            <p className="font-medium text-card-foreground">Signed in</p>
-            <p className="max-w-[12rem] truncate">{userEmail ?? userId}</p>
+        <div className="flex items-center gap-2">
+          <div
+            aria-label={`Signed in as ${userEmail ?? userId}`}
+            title={userEmail ?? userId}
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-xs font-semibold text-card-foreground"
+          >
+            {userInitials}
           </div>
           <button
             type="button"
             onClick={() => void onSignOut()}
-            className="h-9 rounded-md border border-border px-3 text-sm font-medium text-card-foreground transition-colors hover:bg-muted"
+            aria-label="Sign out"
+            title="Sign out"
+            className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-card-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
-            Sign out
+            <LogOut size={18} aria-hidden="true" />
           </button>
         </div>
       </header>
@@ -55,8 +73,17 @@ export function Dashboard({ userId, userEmail, onSignOut }: DashboardProps) {
       {loading ? (
         <SkeletonList />
       ) : error ? (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-foreground">
-          {error}
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-foreground">
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={() => void reload()}
+            aria-label="Retry loading habits"
+            title="Retry loading habits"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-destructive/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            <RefreshCw size={18} aria-hidden="true" />
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-4">

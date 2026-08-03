@@ -1,10 +1,7 @@
 
-function isAuthClockSkewError(err: unknown) {
-  if (!(err instanceof Error)) return false;
-  return err.message.includes("JWT issued at future") || err.message.includes("PGRST303");
-}
 import { useCallback, useEffect, useState } from "react";
 
+import { requireSupabase } from "@/lib/supabase";
 import {
   createHabit,
   deleteHabit,
@@ -15,6 +12,13 @@ import {
 import { todayKey } from "@/utils/dates";
 
 import type { HabitWithCompletions, NewHabitInput } from "@/types";
+
+function isAuthClockSkewError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+
+  const { code, message } = error as { code?: unknown; message?: unknown };
+  return code === "PGRST303" || message === "JWT issued at future";
+}
 
 interface UseHabitsResult {
   habits: HabitWithCompletions[];
@@ -36,25 +40,28 @@ export function useHabits(userId: string): UseHabitsResult {
   const [error, setError] = useState<string | null>(null);
 
 
-  const reload = useCallback(async function reloadAttempt(retryCount = 0) {
+  const reload = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
     try {
-      setError(null);
-      const data = await fetchHabitsWithCompletions(userId);
-      setHabits(data);
-    } catch (err) {
-      console.error("Failed to load habits:", err);
-      if (isAuthClockSkewError(err) && retryCount < 1) {
-        window.setTimeout(() => {
-          void reloadAttempt(retryCount + 1);
-        }, 1500);
-        return;
+      let data: HabitWithCompletions[];
+
+      try {
+        data = await fetchHabitsWithCompletions(userId);
+      } catch (error) {
+        if (!isAuthClockSkewError(error)) throw error;
+
+        const { error: refreshError } = await requireSupabase().auth.refreshSession();
+        if (refreshError) throw refreshError;
+
+        data = await fetchHabitsWithCompletions(userId);
       }
 
-      setError(
-        isAuthClockSkewError(err)
-          ? "Supabase authentication is not ready yet. Refresh the page or sign out and back in."
-          : "Could not load habits. Please try again.",
-      );
+      setHabits(data);
+    } catch (error) {
+      console.error("Failed to load habits:", error);
+      setError("Could not load habits. Please try again.");
     } finally {
       setLoading(false);
     }
