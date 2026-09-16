@@ -5,7 +5,6 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-
 export default defineConfig({
   base: "/habits-tracker/",
   // Expose only the client env vars used by this app.
@@ -49,12 +48,6 @@ export default defineConfig({
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2}"],
         navigateFallback: "/habits-tracker/index.html",
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) => url.origin === self.location.origin,
-            handler: "StaleWhileRevalidate",
-          },
-        ],
       },
     }),
   ],

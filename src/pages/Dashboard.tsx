@@ -6,6 +6,7 @@ import { AddHabitModal } from "@/components/AddHabitModal";
 import { EmptyState } from "@/components/EmptyState";
 import { HabitCard } from "@/components/HabitCard";
 import { SummaryHeader } from "@/components/SummaryHeader";
+import { Button } from "@/components/ui/button";
 import { useHabits } from "@/hooks/useHabits";
 import { todayKey } from "@/utils/dates";
 
@@ -58,15 +59,17 @@ export function Dashboard({ userId, userEmail, onSignOut }: DashboardProps) {
           >
             {userInitials}
           </div>
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="icon"
             onClick={() => void onSignOut()}
             aria-label="Sign out"
             title="Sign out"
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-card-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="h-9 w-9 rounded-md border border-border text-card-foreground hover:bg-muted"
           >
             <LogOut size={18} aria-hidden="true" />
-          </button>
+          </Button>
         </div>
       </header>
 
@@ -75,15 +78,17 @@ export function Dashboard({ userId, userEmail, onSignOut }: DashboardProps) {
       ) : error ? (
         <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-foreground">
           <p>{error}</p>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={() => void reload()}
             aria-label="Retry loading habits"
             title="Retry loading habits"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-destructive/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            className="h-8 w-8 rounded-md text-foreground hover:bg-destructive/15"
           >
             <RefreshCw size={18} aria-hidden="true" />
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
@@ -106,14 +111,15 @@ export function Dashboard({ userId, userEmail, onSignOut }: DashboardProps) {
         </div>
       )}
 
-      <button
+      <Button
         type="button"
         onClick={() => setModalOpen(true)}
         aria-label="Add habit"
-        className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-5 flex h-14 w-14 items-center justify-center rounded-full bg-(--color-primary) text-primary-foreground shadow-lg shadow-black/40 transition-transform active:scale-90 sm:right-[max(1.25rem,calc(50vw-20rem+1.25rem))]"
+        size="icon"
+        className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-5 h-14 w-14 rounded-full bg-(--color-primary) text-primary-foreground shadow-lg shadow-black/40 transition-transform active:scale-90 sm:right-[max(1.25rem,calc(50vw-20rem+1.25rem))]"
       >
         <Plus size={26} aria-hidden="true" />
-      </button>
+      </Button>
 
       <AddHabitModal
         key={modalOpen ? "open" : "closed"}
@@ -121,6 +127,7 @@ export function Dashboard({ userId, userEmail, onSignOut }: DashboardProps) {
         onClose={() => setModalOpen(false)}
         onCreate={addHabit}
       />
+
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { LockKeyhole, Mail } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 type AuthMode = "signIn" | "signUp";
 
 interface AuthScreenProps {
@@ -44,28 +46,26 @@ export function AuthScreen({ onSubmit, loading, error, message }: AuthScreenProp
           </div>
 
           <div className="mb-4 grid grid-cols-2 rounded-full border border-border bg-background p-1">
-            <button
+            <Button
               type="button"
+              variant={mode === "signIn" ? "default" : "ghost"}
               onClick={() => setMode("signIn")}
-              className={`h-10 rounded-full text-sm font-medium transition-colors ${
-                mode === "signIn"
-                  ? "bg-(--color-primary) text-primary-foreground"
-                  : "text-muted-foreground"
+              className={`h-10 rounded-full text-sm font-medium ${
+                mode === "signIn" ? "bg-(--color-primary) text-primary-foreground" : "text-muted-foreground"
               }`}
             >
               Sign in
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant={mode === "signUp" ? "default" : "ghost"}
               onClick={() => setMode("signUp")}
-              className={`h-10 rounded-full text-sm font-medium transition-colors ${
-                mode === "signUp"
-                  ? "bg-(--color-primary) text-primary-foreground"
-                  : "text-muted-foreground"
+              className={`h-10 rounded-full text-sm font-medium ${
+                mode === "signUp" ? "bg-(--color-primary) text-primary-foreground" : "text-muted-foreground"
               }`}
             >
               Create account
-            </button>
+            </Button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -104,7 +104,7 @@ export function AuthScreen({ onSubmit, loading, error, message }: AuthScreenProp
               </div>
             </label>
 
-            <button
+            <Button
               type="submit"
               disabled={submitting || loading}
               className="h-11 w-full rounded-md bg-(--color-primary) font-medium text-primary-foreground transition-opacity disabled:opacity-50"
@@ -114,7 +114,7 @@ export function AuthScreen({ onSubmit, loading, error, message }: AuthScreenProp
                 : mode === "signIn"
                   ? "Sign in"
                   : "Create account"}
-            </button>
+            </Button>
           </form>
 
           {(error || message) && (

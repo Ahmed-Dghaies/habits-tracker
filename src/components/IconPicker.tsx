@@ -1,5 +1,6 @@
 import { Activity } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { hexToRgba } from "@/utils/colors";
 import { HABIT_ICONS, HABIT_ICON_NAMES } from "@/utils/icons";
 
@@ -20,14 +21,16 @@ export function IconPicker({ value, color, onChange }: IconPickerProps) {
         const Icon = HABIT_ICONS[name] ?? Activity;
         const selected = value === name;
         return (
-          <button
+          <Button
             key={name}
             type="button"
             role="option"
             aria-selected={selected}
             aria-label={name}
             onClick={() => onChange(name)}
-            className="flex aspect-square items-center justify-center rounded-md border transition-colors"
+            variant="ghost"
+            size="icon"
+            className="aspect-square rounded-md border transition-colors"
             style={
               selected
                 ? { backgroundColor: hexToRgba(color, 0.16), borderColor: color, color }
@@ -35,7 +38,7 @@ export function IconPicker({ value, color, onChange }: IconPickerProps) {
             }
           >
             <Icon size={18} aria-hidden="true" />
-          </button>
+          </Button>
         );
       })}
     </div>
