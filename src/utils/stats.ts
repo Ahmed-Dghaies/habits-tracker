@@ -1,14 +1,14 @@
 import { addDays, toDateKey } from "@/utils/dates"
 
 /** Current consecutive-day streak ending today (or yesterday). */
-export function currentStreak(completedDates: Set<string>): number {
+export function currentStreak(completedDates: string[]): number {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
   // Allow the streak to count from today or, if today isn't done yet, yesterday.
-  let cursor = completedDates.has(toDateKey(today)) ? today : addDays(today, -1)
+  let cursor = completedDates.includes(toDateKey(today)) ? today : addDays(today, -1)
   let streak = 0
-  while (completedDates.has(toDateKey(cursor))) {
+  while (completedDates.includes(toDateKey(cursor))) {
     streak++
     cursor = addDays(cursor, -1)
   }
@@ -21,7 +21,7 @@ export function currentStreak(completedDates: Set<string>): number {
  * Recent days count more heavily: today = 1.0, yesterday = 0.9, ..., 9 days ago = 0.1,
  * and older days beyond 10 days ago contribute 0.
  */
-export function momentum(completedDates: Set<string>): number {
+export function momentum(completedDates: string[]): number {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -34,7 +34,7 @@ export function momentum(completedDates: Set<string>): number {
     const weight = offset < 10 ? Number((1 - offset * 0.1).toFixed(1)) : 0
 
     possibleWeight += weight
-    if (completedDates.has(dateKey)) {
+    if (completedDates.includes(dateKey)) {
       completedWeight += weight
     }
   }
