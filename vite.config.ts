@@ -2,8 +2,8 @@ import path from "node:path";
 
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   base: "/habits-tracker/",
@@ -17,6 +17,15 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: true,
+  },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.ts"],
+    css: true,
+    env: {
+      VITE_SUPABASE_URL: "http://localhost:54321",
+      VITE_SUPABASE_PUBLISHABLE_KEY: "test-publishable-key",
+    },
   },
   plugins: [
     react(),

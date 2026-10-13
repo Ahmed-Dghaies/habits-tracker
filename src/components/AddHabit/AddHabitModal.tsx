@@ -88,6 +88,7 @@ const AddHabitModal = ({ open, onClose, createAction }: AddHabitModalProps) => {
             </span>
             <input
               ref={inputRef}
+              aria-label="habit-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
