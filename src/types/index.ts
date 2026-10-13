@@ -15,9 +15,9 @@ export interface HabitCompletion {
   created_at: string
 }
 
-/** A habit joined with the set of dates on which it was completed. */
+/** A habit joined with the dates on which it was completed. */
 export interface HabitWithCompletions extends Habit {
-  completedDates: Set<string>
+  completedDates: string[]
 }
 
 export interface NewHabitInput {

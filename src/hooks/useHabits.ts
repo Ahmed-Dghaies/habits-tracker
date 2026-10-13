@@ -1,158 +1,148 @@
+import { useCallback } from "react";
 
-import { useCallback, useEffect, useState } from "react";
-
-import { requireSupabase } from "@/lib/supabase";
 import {
-  createHabit,
-  deleteHabit,
-  fetchHabitsWithCompletions,
-  markCompleted,
-  unmarkCompleted,
-} from "@/services/habitsService";
+  useAddHabitMutation,
+  useDeleteHabitMutation,
+  useGetHabitsQuery,
+  useSetCompletionMutation,
+} from "@/lib/habitsApi";
 import { todayKey } from "@/utils/dates";
 
-import type { HabitWithCompletions, NewHabitInput } from "@/types";
+import type { NewHabitInput } from "@/types";
 
-function isAuthClockSkewError(error: unknown): boolean {
-  if (typeof error !== "object" || error === null) return false;
-
-  const { code, message } = error as { code?: unknown; message?: unknown };
-  return code === "PGRST303" || message === "JWT issued at future";
+interface ActionState {
+  isLoading: boolean;
+  isError: boolean;
 }
 
-interface UseHabitsResult {
-  habits: HabitWithCompletions[];
-  loading: boolean;
-  error: string | null;
-  addHabit: (input: NewHabitInput) => Promise<boolean>;
-  removeHabit: (habitId: string) => Promise<void>;
-  toggleToday: (habitId: string) => Promise<void>;
-  reload: () => Promise<void>;
+export interface HabitAction<Arguments extends object, Result> extends ActionState {
+  handler: (args: Arguments) => Promise<Result>;
 }
 
-/**
- * Central state + actions for habits. Uses optimistic updates so the UI feels
- * instant, then reconciles with Supabase.
- */
-export function useHabits(userId: string): UseHabitsResult {
-  const [habits, setHabits] = useState<HabitWithCompletions[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export interface HabitActionWithoutArguments<Result> extends ActionState {
+  handler: () => Promise<Result>;
+}
 
+export interface AddHabitArguments {
+  input: NewHabitInput;
+}
 
-  const reload = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+export interface HabitIdArguments {
+  habitId: string;
+}
 
-    try {
-      let data: HabitWithCompletions[];
+export interface CompletionDateArguments {
+  dateKey: string;
+}
 
+export interface LogCompletionArguments extends HabitIdArguments, CompletionDateArguments {}
+
+export function useHabits(userId: string) {
+  const {
+    data: habits = [],
+    isLoading: isLoadingHabits,
+    isError: isGetHabitsError,
+    refetch: refetchHabits,
+  } = useGetHabitsQuery(userId);
+  const [triggerAddHabit, { isLoading: isAddingHabit, isError: isAddHabitError }] =
+    useAddHabitMutation();
+  const [triggerDeleteHabit, { isLoading: isRemovingHabit, isError: isRemoveHabitError }] =
+    useDeleteHabitMutation();
+  const [triggerLogCompletion, { isLoading: isLoggingCompletion, isError: isLogCompletionError }] =
+    useSetCompletionMutation();
+  const [triggerToggleToday, { isLoading: isTogglingToday, isError: isToggleTodayError }] =
+    useSetCompletionMutation();
+
+  const handleAddHabit = useCallback(
+    async ({ input }: AddHabitArguments): Promise<boolean> => {
       try {
-        data = await fetchHabitsWithCompletions(userId);
-      } catch (error) {
-        if (!isAuthClockSkewError(error)) throw error;
-
-        const { error: refreshError } = await requireSupabase().auth.refreshSession();
-        if (refreshError) throw refreshError;
-
-        data = await fetchHabitsWithCompletions(userId);
-      }
-
-      setHabits(data);
-    } catch (error) {
-      console.error("Failed to load habits:", error);
-      setError("Could not load habits. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void reload();
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [reload]);
-
-  const addHabit = useCallback(async (input: NewHabitInput) => {
-    try {
-      setError(null);
-      const created = await createHabit(input, userId);
-      setHabits((prev) => [...prev, { ...created, completedDates: new Set<string>() }]);
-      return true;
-    } catch (err) {
-      console.error("Failed to create habit:", err);
-      setError("Could not create habit. Please check your Supabase configuration.");
-      return false;
-    }
-  }, [userId]);
-
-  const removeHabit = useCallback(
-    async (habitId: string) => {
-      const habitToRestore = habits.find((habit) => habit.id === habitId);
-      const originalIndex = habits.findIndex((habit) => habit.id === habitId);
-      setError(null);
-      setHabits((prev) => prev.filter((h) => h.id !== habitId));
-      try {
-        await deleteHabit(habitId, userId);
-      } catch (err) {
-        console.error("Failed to delete habit:", err);
-        if (habitToRestore && originalIndex >= 0) {
-          setHabits((prev) => {
-            const next = [...prev];
-            next.splice(originalIndex, 0, habitToRestore);
-            return next;
-          });
-        }
-        setError("Could not delete habit. Please check your Supabase configuration.");
+        await triggerAddHabit({ input, userId }).unwrap();
+        return true;
+      } catch {
+        return false;
       }
     },
-      [habits, userId],
+    [triggerAddHabit, userId],
   );
 
-  const toggleToday = useCallback(
-    async (habitId: string) => {
-      const key = todayKey();
-      const habit = habits.find((h) => h.id === habitId);
+  const handleRemoveHabit = useCallback(
+    async ({ habitId }: HabitIdArguments): Promise<boolean> => {
+      try {
+        await triggerDeleteHabit({ habitId, userId }).unwrap();
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [triggerDeleteHabit, userId],
+  );
+
+  const handleLogCompletion = useCallback(
+    async ({ habitId, dateKey }: LogCompletionArguments): Promise<boolean> => {
+      try {
+        await triggerLogCompletion({ habitId, userId, dateKey, completed: true }).unwrap();
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [triggerLogCompletion, userId],
+  );
+
+  const handleToggleToday = useCallback(
+    async ({ habitId }: HabitIdArguments): Promise<void> => {
+      const dateKey = todayKey();
+      const habit = habits.find((item) => item.id === habitId);
       if (!habit) return;
-      const isDone = habit.completedDates.has(key);
-      setError(null);
-
-      // Optimistic update.
-      setHabits((prev) =>
-        prev.map((h) => {
-          if (h.id !== habitId) return h;
-          const next = new Set(h.completedDates);
-          if (isDone) next.delete(key);
-          else next.add(key);
-          return { ...h, completedDates: next };
-        }),
-      );
 
       try {
-        if (isDone) await unmarkCompleted(habitId, key, userId);
-        else await markCompleted(habitId, key, userId);
-      } catch (err) {
-        console.error("Failed to toggle completion:", err);
-        // Revert on failure.
-        setHabits((prev) =>
-          prev.map((h) => {
-            if (h.id !== habitId) return h;
-            const next = new Set(h.completedDates);
-            if (isDone) next.add(key);
-            else next.delete(key);
-            return { ...h, completedDates: next };
-          }),
-        );
-        setError("Could not update habit completion. Please check your Supabase configuration.");
-        return;
+        await triggerToggleToday({
+          habitId,
+          userId,
+          dateKey,
+          completed: !habit.completedDates.includes(dateKey),
+        }).unwrap();
+      } catch {
+        // The mutation error is exposed through the hook result.
       }
-
-      setError(null);
     },
-    [habits, userId],
+    [habits, triggerToggleToday, userId],
   );
 
-  return { habits, loading, error, addHabit, removeHabit, toggleToday, reload };
+  const refetchHabitsHandler = useCallback(async () => {
+    try {
+      await refetchHabits().unwrap();
+    } catch {
+      // The mutation error is exposed through the hook result.
+    }
+  }, [refetchHabits]);
+
+  return {
+    getHabits: {
+      data: habits,
+      isLoading: isLoadingHabits,
+      isError: isGetHabitsError,
+      refetch: refetchHabitsHandler,
+    },
+    addHabit: {
+      handler: handleAddHabit,
+      isLoading: isAddingHabit,
+      isError: isAddHabitError,
+    },
+    removeHabit: {
+      handler: handleRemoveHabit,
+      isLoading: isRemovingHabit,
+      isError: isRemoveHabitError,
+    },
+    logCompletion: {
+      handler: handleLogCompletion,
+      isLoading: isLoggingCompletion,
+      isError: isLogCompletionError,
+    },
+    toggleToday: {
+      handler: handleToggleToday,
+      isLoading: isTogglingToday,
+      isError: isToggleTodayError,
+    },
+  };
 }

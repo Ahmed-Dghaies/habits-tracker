@@ -12,16 +12,26 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+import type { HabitActionWithoutArguments } from "@/hooks/useHabits";
+
 interface ConfirmDeleteModalProps {
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   habitName: string;
-  onConfirm: () => Promise<void> | void;
+  action: HabitActionWithoutArguments<boolean>;
 }
 
-export function ConfirmDeleteModal({ trigger, habitName, onConfirm }: ConfirmDeleteModalProps) {
+export function ConfirmDeleteModal({
+  trigger,
+  open,
+  onOpenChange,
+  habitName,
+  action,
+}: ConfirmDeleteModalProps) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
 
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -32,15 +42,26 @@ export function ConfirmDeleteModal({ trigger, habitName, onConfirm }: ConfirmDel
           <AlertDialogDescription>
             This will permanently remove <span className="font-medium text-foreground">{habitName}</span> and its progress.
           </AlertDialogDescription>
+          {action.isError && (
+            <p className="text-sm text-destructive" role="alert">
+              Could not delete this habit. Please try again.
+            </p>
+          )}
         </AlertDialogHeader>
 
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
-            onClick={() => void onConfirm()}
+            disabled={action.isLoading}
+            onClick={(event) => {
+              event.preventDefault();
+              void action.handler().then((deleted) => {
+                if (deleted) onOpenChange?.(false);
+              });
+            }}
           >
-            Delete habit
+            {action.isLoading ? "Deleting…" : "Delete habit"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -6,7 +6,7 @@ interface EmptyStateProps {
   onAdd: () => void;
 }
 
-export function EmptyState({ onAdd }: EmptyStateProps) {
+const EmptyState = ({ onAdd }: EmptyStateProps) => {
   return (
     <div className="animate-fade-in flex flex-col items-center rounded-lg border border-dashed border-border bg-card/40 px-6 py-14 text-center">
       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-(--color-primary)">
@@ -25,4 +25,6 @@ export function EmptyState({ onAdd }: EmptyStateProps) {
       </Button>
     </div>
   );
-}
+};
+
+export default EmptyState;

@@ -5,7 +5,7 @@ import { addDays, monthLabel, startOfWeekSunday, toDateKey, formatLongDate } fro
 
 interface HeatmapProps {
   color: string;
-  completedDates: Set<string>;
+  completedDates: string[];
   /** Number of weeks (columns) to display. */
   weeks?: number;
 }
@@ -68,7 +68,7 @@ export function Heatmap({ color, completedDates, weeks = 18 }: HeatmapProps) {
         column.push({
           key,
           inFuture: date.getTime() > today.getTime(),
-          done: completedDates.has(key),
+          done: completedDates.includes(key),
         });
       }
       // Month label appears on the first week that introduces a new month.

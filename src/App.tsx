@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 
 import { AuthScreen } from "@/components/AuthScreen";
+import { habitsApi } from "@/lib/habitsApi";
 import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 import { Dashboard } from "@/pages/Dashboard";
+import { store } from "@/stores/store";
 
 import type { Session } from "@supabase/supabase-js";
 
@@ -27,6 +29,7 @@ export default function App() {
 
     const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
+      if (!nextSession) store.dispatch(habitsApi.util.resetApiState());
       setAuthError(null);
       setAuthMessage(null);
       setAuthLoading(false);
@@ -95,11 +98,7 @@ export default function App() {
           </div>
         </div>
       ) : session ? (
-        <Dashboard
-          userId={session.user.id}
-          userEmail={session.user.email}
-          onSignOut={handleSignOut}
-        />
+        <Dashboard user={session.user} onSignOut={handleSignOut} />
       ) : (
         <AuthScreen
           onSubmit={handleAuthSubmit}

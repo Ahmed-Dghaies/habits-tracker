@@ -2,23 +2,22 @@ import { useEffect, useRef, useState } from "react";
 
 import { Activity, X } from "lucide-react";
 
-import { IconPicker } from "@/components/IconPicker";
+import { IconPicker } from "@/components/AddHabit/IconPicker";
 import { HABIT_COLORS, randomColor } from "@/utils/colors";
 import { HABIT_ICONS } from "@/utils/icons";
 
-import type { NewHabitInput } from "@/types";
+import type { AddHabitArguments, HabitAction } from "@/hooks/useHabits";
 
 interface AddHabitModalProps {
   open: boolean;
   onClose: () => void;
-  onCreate: (input: NewHabitInput) => Promise<boolean>;
+  createAction: HabitAction<AddHabitArguments, boolean>;
 }
 
-export function AddHabitModal({ open, onClose, onCreate }: AddHabitModalProps) {
+const AddHabitModal = ({ open, onClose, createAction }: AddHabitModalProps) => {
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("Activity");
   const [color, setColor] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Close on Escape.
@@ -40,19 +39,16 @@ export function AddHabitModal({ open, onClose, onCreate }: AddHabitModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
-    if (!trimmed || submitting) return;
-    setSubmitting(true);
-    try {
-      // Assign a random palette color if the user didn't pick one.
-      const created = await onCreate({ name: trimmed, icon, color: color ?? randomColor() });
-      if (created) {
-        onClose();
-      }
-    } catch (err) {
-      console.error("Failed to create habit:", err);
-    } finally {
-      setSubmitting(false);
-    }
+    if (!trimmed || createAction.isLoading) return;
+
+    const created = await createAction.handler({
+      input: {
+        name: trimmed,
+        icon,
+        color: color ?? randomColor(),
+      },
+    });
+    if (created) onClose();
   };
 
   return (
@@ -92,6 +88,7 @@ export function AddHabitModal({ open, onClose, onCreate }: AddHabitModalProps) {
             </span>
             <input
               ref={inputRef}
+              aria-label="habit-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -131,13 +128,20 @@ export function AddHabitModal({ open, onClose, onCreate }: AddHabitModalProps) {
 
           <button
             type="submit"
-            disabled={!name.trim() || submitting}
+            disabled={!name.trim() || createAction.isLoading}
             className="mt-1 h-11 rounded-md bg-(--color-primary) font-medium text-primary-foreground transition-opacity disabled:opacity-50"
           >
-            {submitting ? "Adding…" : "Add habit"}
+            {createAction.isLoading ? "Adding…" : "Add habit"}
           </button>
+          {createAction.isError && (
+            <p className="text-sm text-destructive" role="alert">
+              Could not add the habit. Please try again.
+            </p>
+          )}
         </form>
       </div>
     </div>
   );
-}
+};
+
+export default AddHabitModal;

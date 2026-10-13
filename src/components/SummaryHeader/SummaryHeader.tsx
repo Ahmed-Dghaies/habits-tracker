@@ -3,7 +3,7 @@ interface SummaryHeaderProps {
   total: number;
 }
 
-export function SummaryHeader({ completedToday, total }: SummaryHeaderProps) {
+const SummaryHeader = ({ completedToday, total }: SummaryHeaderProps) => {
   const pct = total === 0 ? 0 : Math.round((completedToday / total) * 100);
   const allDone = total > 0 && completedToday === total;
 
@@ -40,4 +40,6 @@ export function SummaryHeader({ completedToday, total }: SummaryHeaderProps) {
       )}
     </div>
   );
-}
+};
+
+export default SummaryHeader;
