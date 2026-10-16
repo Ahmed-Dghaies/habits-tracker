@@ -53,7 +53,7 @@ const AddHabitModal = ({ open, onClose, createAction }: AddHabitModalProps) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={onClose}
       role="presentation"
     >
@@ -62,7 +62,7 @@ const AddHabitModal = ({ open, onClose, createAction }: AddHabitModalProps) => {
         aria-modal="true"
         aria-labelledby="add-habit-title"
         onClick={(e) => e.stopPropagation()}
-        className="animate-scale-in w-full max-w-md rounded-t-2xl border border-border bg-card p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-2xl"
+        className="animate-scale-in max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-card p-5"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 id="add-habit-title" className="text-lg font-semibold text-card-foreground">

@@ -1,5 +1,6 @@
 .snowflake/
 .vercel/
+.vscode/
 
 # Generated build output
 dist/

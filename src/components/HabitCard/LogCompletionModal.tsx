@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 
-import { CalendarCheck, CheckCircle2, X } from "lucide-react";
+import { CalendarCheck, CalendarDays, CheckCircle2, X } from "lucide-react";
 import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
-import { todayKey } from "@/utils/dates";
+import { formatLongDate, todayKey } from "@/utils/dates";
 
 import type { CompletionDateArguments, HabitAction } from "@/hooks/useHabits";
 
@@ -45,7 +45,7 @@ export function LogCompletionModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={onClose}
       role="presentation"
     >
@@ -54,7 +54,7 @@ export function LogCompletionModal({
         aria-modal="true"
         aria-labelledby="log-completion-title"
         onClick={(event) => event.stopPropagation()}
-        className="animate-scale-in w-full max-w-sm rounded-t-2xl border border-border bg-card p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:rounded-2xl"
+        className="animate-scale-in max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto rounded-2xl border border-border bg-card p-5"
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
@@ -87,23 +87,28 @@ export function LogCompletionModal({
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <label
               htmlFor="completion-date"
               className="mb-1.5 block text-sm font-medium text-card-foreground"
             >
               Completion date
             </label>
-            <input
-              id="completion-date"
-              type="date"
-              value={dateKey}
-              max={todayKey()}
-              onChange={(event) => setDateKey(event.target.value)}
-              className="h-11 w-full rounded-md border border-border bg-background px-3 text-foreground outline-none transition-colors focus:border-(--color-primary)"
-              autoFocus
-              required
-            />
+            <div className="relative h-11 min-w-0 w-full overflow-hidden rounded-md border border-border bg-background transition-colors focus-within:border-(--color-primary)">
+              <span aria-hidden="true" className="pointer-events-none flex h-full items-center justify-between gap-2 px-3 text-foreground">
+                {dateKey ? formatLongDate(dateKey) : "Select a date"}
+                <CalendarDays className="size-4 shrink-0" />
+              </span>
+              <input
+                id="completion-date"
+                type="date"
+                value={dateKey}
+                max={todayKey()}
+                onChange={(event) => setDateKey(event.target.value)}
+                className="absolute inset-0 h-full w-full min-w-0 cursor-pointer opacity-0"
+                required
+              />
+            </div>
             {alreadyCompleted && (
               <p className="mt-2 text-xs text-muted-foreground">
                 This date is already marked complete.

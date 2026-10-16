@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { Dashboard } from "@/pages/Dashboard";
 import { renderWithProvider } from "@/test/renderWithProvider";
 import { API_URL, server, USER_ID } from "@/test/server";
-import { todayKey } from "@/utils/dates";
+import { formatLongDate, todayKey } from "@/utils/dates";
 
 import type { User } from "@supabase/supabase-js";
 
@@ -128,9 +128,12 @@ describe("Habit tracker dashboard", () => {
     await user.click(screen.getByRole("button", { name: "Actions for Drink water" }));
     await user.click(screen.getByRole("menuitem", { name: "Log completion" }));
 
+    const dialog = screen.getByRole("dialog", { name: "Log completion" });
+    expect(within(dialog).getByText(formatLongDate(todayKey()))).toBeInTheDocument();
     const dateInput = screen.getByLabelText("Completion date");
     await user.clear(dateInput);
     await user.type(dateInput, "2026-09-29");
+    expect(within(dialog).getByText("29 Sep 2026")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Log completion" }));
 
     await waitFor(() => {
